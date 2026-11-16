@@ -16,13 +16,17 @@ for src in starter.rglob('*'):
  updates.append((src,dst,rel))
 for name,target in [('editorial-rules.md','PRODUCTION_RULES.md'),('implementation-matrix.md','IMPLEMENTATION_MATRIX.md')]:
  src=skill/'references'/name;dst=root/target
- if dst.exists() and sha(dst)!=sha(src):blocked.append(target)
+ text=src.read_text().replace('](implementation-matrix.md)','](IMPLEMENTATION_MATRIX.md)').replace('](editorial-rules.md)','](PRODUCTION_RULES.md)')
+ if dst.exists() and dst.read_text()!=text:blocked.append(target)
  elif not dst.exists():updates.append((src,dst,target))
 plan={'project':str(root),'updates':[x[2] for x in updates],'blockedCustomFiles':blocked,'preserved':['episode text/timings','public media','runtime.local.json','account credentials'],'apply':a.apply}
 print(json.dumps(plan,ensure_ascii=False,indent=2))
 if blocked:raise SystemExit('Custom files found. Compare and port changes manually; nothing was overwritten.')
 if a.apply:
- for src,dst,_ in updates:dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
+ for src,dst,rel in updates:
+  dst.parent.mkdir(parents=True,exist_ok=True)
+  if rel in ['PRODUCTION_RULES.md','IMPLEMENTATION_MATRIX.md']:dst.write_text(src.read_text().replace('](implementation-matrix.md)','](IMPLEMENTATION_MATRIX.md)').replace('](editorial-rules.md)','](PRODUCTION_RULES.md)'))
+  else:shutil.copyfile(src,dst)
  d=json.loads((root/'episode.json').read_text())
  if not d.get('fontPreset'):
   known=set(d.get('fonts',{}).values())<= {'fonts/NotoSansSC.ttf','fonts/NotoSerifSC.ttf'}

@@ -38,7 +38,7 @@ class VisualContract(unittest.TestCase):
  def test_init_carries_detailed_rules_into_project(self):
   with tempfile.TemporaryDirectory() as td:
    dst=Path(td)/'project';subprocess.run([sys.executable,str(SKILL/'scripts/init_project.py'),str(dst)],check=True,capture_output=True)
-   self.assertEqual((dst/'PRODUCTION_RULES.md').read_bytes(),(SKILL/'references/editorial-rules.md').read_bytes());self.assertTrue((dst/'AGENTS.md').is_file());self.assertTrue((dst/'IMPLEMENTATION_MATRIX.md').is_file())
+   self.assertEqual((dst/'PRODUCTION_RULES.md').read_text(),(SKILL/'references/editorial-rules.md').read_text().replace('](implementation-matrix.md)','](IMPLEMENTATION_MATRIX.md)'));self.assertTrue((dst/'AGENTS.md').is_file());self.assertTrue((dst/'IMPLEMENTATION_MATRIX.md').is_file())
  def test_upgrade_preserves_custom_sources(self):
   with tempfile.TemporaryDirectory() as td:
    dst=Path(td);(dst/'src').mkdir();source=dst/'src/Root.tsx';source.write_text('CUSTOM USER SOURCE');(dst/'episode.json').write_text('{}')
