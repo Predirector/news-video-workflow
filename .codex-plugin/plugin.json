@@ -1,6 +1,6 @@
 {
   "name": "news-video-workflow",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "中文竖屏资讯视频：稿件分析、真实素材、差异化模板、Remotion渲染与交付核验。",
   "author": {
     "name": "Predirector"

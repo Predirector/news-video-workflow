@@ -24,14 +24,36 @@ for src in (ROOT/'public').rglob('*'):
   dst=pub/src.relative_to(ROOT/'public')
   if src.resolve()!=dst.resolve() and not dst.exists():dst.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dst)
 if not a.skip_fonts:
- for name,slug in [('NotoSansSC','notosanssc'),('NotoSerifSC','notoserifsc')]:
-  folder=pub/'fonts';folder.mkdir(exist_ok=True)
-  for file,url in [(name+'.ttf',f'https://raw.githubusercontent.com/google/fonts/main/ofl/{slug}/{name}%5Bwght%5D.ttf'),(name+'-OFL.txt',f'https://raw.githubusercontent.com/google/fonts/main/ofl/{slug}/OFL.txt')]:
-   dst=folder/file
+ from visual import resolve_fonts
+ episode=resolve_fonts(json.loads((ROOT/'episode.json').read_text()))
+ catalog=json.loads((ROOT/'font-catalog.json').read_text())
+ for rel in set(episode['fonts'].values()):
+  dst=pub/rel;dst.parent.mkdir(parents=True,exist_ok=True)
+  entry=catalog.get(rel)
+  if entry:
+   if dst.exists() and __import__('hashlib').sha256(dst.read_bytes()).hexdigest()!=entry['sha256']:raise SystemExit('Pinned font hash mismatch: '+rel)
    if not dst.exists():
-    temp=dst.with_suffix(dst.suffix+'.part')
-    with urllib.request.urlopen(url,timeout=60) as response,temp.open('wb') as out:shutil.copyfileobj(response,out)
-    temp.replace(dst)
+    temp=dst.with_suffix('.part')
+    try:
+     request=urllib.request.Request(entry['url'],headers={'Referer':entry['referer'],'User-Agent':'Mozilla/5.0'})
+     with urllib.request.urlopen(request,timeout=60) as response,temp.open('wb') as out:shutil.copyfileobj(response,out)
+     if __import__('hashlib').sha256(temp.read_bytes()).hexdigest()!=entry['sha256']:raise RuntimeError('Official font bytes changed; stop and review the catalog instead of substituting')
+     temp.replace(dst)
+    finally:
+     if temp.exists():temp.unlink()
+   if entry.get('licenseUrl'):
+    license_file=dst.with_name(dst.stem+'-OFL.txt')
+    if not license_file.exists():
+     with urllib.request.urlopen(entry['licenseUrl'],timeout=60) as response:license_file.write_bytes(response.read())
+   (dst.parent/(dst.stem+'-SOURCE.json')).write_text(json.dumps(entry,ensure_ascii=False,indent=2))
+  elif rel in ['fonts/NotoSansSC.ttf','fonts/NotoSerifSC.ttf']:
+   name=Path(rel).stem;slug='notosanssc' if name=='NotoSansSC' else 'notoserifsc'
+   for target,url in [(dst,f'https://raw.githubusercontent.com/google/fonts/main/ofl/{slug}/{name}%5Bwght%5D.ttf'),(dst.with_name(name+'-OFL.txt'),f'https://raw.githubusercontent.com/google/fonts/main/ofl/{slug}/OFL.txt')]:
+    if not target.exists():
+     temp=target.with_suffix('.part')
+     with urllib.request.urlopen(url,timeout=60) as response,temp.open('wb') as out:shutil.copyfileobj(response,out)
+     temp.replace(target)
+  elif not dst.exists():raise SystemExit('Custom font missing: '+rel+'. Import your own licensed font; no automatic substitute.')
 if not a.skip_browser:
  cmd=['node',str(ROOT/'node_modules/@remotion/cli/remotion-cli.js'),'browser','ensure'];exe=os.environ.get('REMOTION_BROWSER_EXECUTABLE') or config().get('browserExecutable')
  if exe:cmd+=['--browser-executable',exe]

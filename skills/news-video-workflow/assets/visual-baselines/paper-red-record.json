@@ -1,0 +1,73 @@
+{
+  "style": "paper-red",
+  "renderMode": "encoded MP4 frames",
+  "fonts": {
+    "title": {
+      "asset": "fonts/AlibabaPuHuiTi-2-115-Black.ttf",
+      "family": "Alibaba PuHuiTi 2.0",
+      "style": "115 Black",
+      "selectedWeight": 1000,
+      "variable": false,
+      "sha256": "abe59aa71d082934100cddf1b880c098954549335bf8c0091d0627aa5d1f2e67",
+      "glyphCoveragePassed": true
+    },
+    "subtitle": {
+      "asset": "fonts/AlibabaPuHuiTi-2-105-Heavy.ttf",
+      "family": "Alibaba PuHuiTi 2.0",
+      "style": "105 Heavy",
+      "selectedWeight": 900,
+      "variable": false,
+      "sha256": "27f52c9bd7cba4104acffba8bc9a5f6477be67c19353c548312b31e33dcebab9",
+      "glyphCoveragePassed": true
+    },
+    "body": {
+      "asset": "fonts/AlibabaPuHuiTi-2-85-Bold.ttf",
+      "family": "Alibaba PuHuiTi 2.0",
+      "style": "85 Bold",
+      "selectedWeight": 700,
+      "variable": false,
+      "sha256": "95db198aa30a998fdb38dd0a4b9b44eb383c19c85c43d6506b25e2b4d138fa08",
+      "glyphCoveragePassed": true
+    }
+  },
+  "layout": {
+    "headerTop": 250,
+    "headerBottom": 595,
+    "picture": [
+      40,
+      621,
+      1000,
+      710
+    ],
+    "boardTop": 1361,
+    "subtitleSize": 42,
+    "bodySize": 48,
+    "mainSizes": [
+      76,
+      92
+    ],
+    "coverPicture": [
+      60,
+      623,
+      960,
+      660
+    ],
+    "coverKeywordsTop": 1370,
+    "safeCover": [
+      0,
+      240,
+      1080,
+      1440
+    ],
+    "transitionFrames": 6,
+    "version": "2.0"
+  },
+  "mainTitle": [
+    "真实素材，清晰资讯",
+    "三套样式，按主题变化"
+  ],
+  "subtitle": [
+    "功能演示｜请换成正式稿件与素材"
+  ],
+  "purpose": "Functional visual baseline, not a news story; no customer materials"
+}

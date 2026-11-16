@@ -11,13 +11,17 @@ description: 制作或修改中文竖屏资讯视频，包括纯字幕资讯与�
 
 本技能自带可运行的三套版式和制作工具，全部位于当前技能目录，不依赖仓库外的其他工程。
 
+制作/修改前必须读[详细制作标准R01–R13](references/editorial-rules.md)及[对话要求落实表](references/implementation-matrix.md)，不能只凭本入口摘要开工。新工程同时带入AGENTS.md、完整PRODUCTION_RULES.md与IMPLEMENTATION_MATRIX.md。正式制作由Codex依据原稿填写production-plan.json，逐镜写明事实、选材、封面、字体、背景和音乐决定，不让用户代填技术表。
+
 1. 简化入口：先按[首次连接与选题读取](references/feishu.md)运行 `scripts/news.py --project "<新工程目录>" setup --runtime`，准备官方飞书CLI、采集工具和视频环境。已有工程只补缺项。也可单独用 `python3 "<本技能目录>/scripts/init_project.py" "<新工程目录>"` 创建独立工程，不覆盖已有工程。
 2. 若第一步未使用`--runtime`，进入新工程运行 `python3 scripts/bootstrap.py`。先检查已有Node、Python、FFmpeg、浏览器与依赖，缺什么再安装。Node需要20.19（20系列）或22.12以上，Python需要3.12以上；媒体根目录由使用者自行配置。
-3. 阅读 [制作标准](references/editorial-rules.md)；准备稿件与素材时查 [输入与采集](references/intake.md)。设置 `episode.json` 时查 [配置与制作命令](references/project-format.md)。
+3. 首次渲染前检查[字体与视觉基准](references/visual-reproduction.md)，确认实际文件/字重并对照手机图；演示字体不能被当作原工程字体。阅读 [制作标准](references/editorial-rules.md)；准备稿件与素材时查 [输入与采集](references/intake.md)。设置 `episode.json` 时查 [配置与制作命令](references/project-format.md)。
 4. 飞书使用官方CLI：首次引导 `connect --configure`，用户完成自己的应用/登录授权后 `connect --resume`，再 `status` 验证。已有登录直接复用，由官方CLI管理凭据和刷新；不手抄令牌。按[飞书接入](references/feishu.md)用 `intake --url ... --item ... --download` 读取准确条目、原文和附件；有歧义就缩小范围，不能静默选第一条。
 5. 根据选中原文列素材缺口，按[素材采集命令](references/acquisition.md)使用 `search`、`collect`、`fetch` 或 `import` 搜集真实素材、下载视频和截图原报道。默认不读取浏览器Cookie；需登录时让使用者完成，再显式指定自己的浏览器。下载状态、实际清晰度、来源和选材真实性分别核对。
 
 上述 `scripts/news.py`、`scripts/init_project.py` 与 `scripts/feishu_read.py` 相对于本技能；工程内命令相对于新工程目录。
+
+需要学习参考片或扩展样式库时，按[参考片分析与样式卡](references/reference-library.md)处理实际视频，未核实的字体/音乐不猜名，未实现的样式卡不冒充模板。
 
 ## 从稿件到成片
 
@@ -34,7 +38,8 @@ description: 制作或修改中文竖屏资讯视频，包括纯字幕资讯与�
 工程命令：`node scripts/python.mjs prepare.py` → `node scripts/render.mjs --cover` → `node scripts/render.mjs --frame 60` → `node scripts/render.mjs` → `node scripts/python.mjs verify.py`。
 
 - 验证实际渲染的封面、照片主导帧、报道主导帧（使用报道时）及字幕完整后的帧，按手机尺寸检查。用户未要求先审样时，把静帧作为内部自检并继续完成视频。
-- 自动核验会检查配置、资源、全帧、尺寸、音轨、封面、字幕和短闪候选；Codex还需看实际编码联系表与切镜边界。自动成功不等于内容、音乐和构图已合格。将审核结论写到 `reports/review.json`，注明实际看过的文件和存在问题。
+- 自动核验会检查配置、资源、字体哈希/字重/缺字、可测版式、全帧、尺寸、音轨、封面、字幕和短闪候选；Codex还需看实际编码联系表与切镜边界。自动成功不等于内容、音乐和构图已合格。按review.example.json将逐项审核结论写到 `reports/review.json`，列实际看过的文件和未解决问题，不能只填passed=true。音轨技术通过不代替试听。
+- 旧Skill更新不自动迁移已创建工程。按[迁移与复现](references/visual-reproduction.md)先检查upgrade_project.py计划；自定义源码不覆盖。规则或样式尚未实现的条件分支，明确开发/验证需求，不能当作已有工具承诺。
 - 交付MP4、同名静态封面、SRT、来源记录和可编辑工程；按稿件完整编号与标题命名。当前工具包不包含剪映自动转换，用户需要时另行开发并验证分轨与文字编辑能力，不承诺已支持。
 - 完成本条必要核验后清理重复导出、旧封面、临时混音和过时检查图，保留当前成片、必需原件及可重建工程。使用 `node scripts/python.mjs cleanup.py --apply`，其范围只限本工程记录的过程文件，并在删除后实际渲染验证。
 - Downloads只是收件入口。仅当用户授权或当前任务已明确要求归拢清理时，独立复制素材、核对大小/SHA-256/可读性和工程依赖后，删除这批已核实的下载副本；不能把本项目的清理授权扩展到其他账号、其他项目或未来机器的个人文件。

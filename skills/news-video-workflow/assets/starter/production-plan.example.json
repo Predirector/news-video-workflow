@@ -1,0 +1,13 @@
+{
+  "_instruction": "Codex依据当期原稿和真实素材填写为production-plan.json。示例文字不是验收结论，不可照抄成passed。",
+  "coreMessage": "本条要让观众记住的准确命题，含范围及完成/计划状态",
+  "coverReason": "封面主体和必要关系如何直接解释该命题，而非只好看",
+  "fontDecision": "指定模板、实际字体文件和各字重；缺少授权字体时如何处理",
+  "backgroundReason": "为什么选实景虚化或图形底纹；如何明亮且低于正文",
+  "shots": [
+    {"claim":"与segment一一对应的核心事实","assetWhy":"此素材能直接证明什么，不能用什么泛图替代","identityAndDate":"人物、机构、事件、年份及已核对来源","evidenceOrContext":"fact或context；示意素材不得冒充本次现场","originalReport":"若为报道，原URL/原文件、裁片及逐行标记位置","subtitleRole":"新闻正文或原声字幕；下方补充信息避免重复"}
+  ],
+  "music": {"discoveryUrl":"真实抖音/汽水/参考作品发现页或说明未核实","excerptReason":"实际剪用段鼓点、推进感与本条语境","listenedExcerpt":"实际听过的文件及起止秒，不能只写曲名/BPM","usedMusicCheck":"本批/系列已用音乐核对结果","beatDecision":"参考music-analysis.json候选节点，写实际采用切点与阅读取舍"},
+  "batchDifferences": {"font":"相对同批其他条目的字体差异","title":"主副标题格局","background":"背景类型与质感","panel":"板型与关系","assets":"必要共用和其余不同镜头","music":"避免已用曲"},
+  "exceptions": []
+}

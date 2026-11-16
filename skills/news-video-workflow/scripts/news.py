@@ -9,6 +9,8 @@ def main():
  sub.add_parser('setup').add_argument('--runtime',action='store_true',help='Also install the video runtime dependencies')
  c=sub.add_parser('connect');c.add_argument('--configure',action='store_true');c.add_argument('--resume',help='Device code returned by the official CLI; not an access token')
  sub.add_parser('status')
+ c=sub.add_parser('fonts')
+ for role in ['title','subtitle','body']:c.add_argument('--'+role,required=True)
  c=sub.add_parser('intake');c.add_argument('--url',required=True);c.add_argument('--item',required=True);c.add_argument('--download',action='store_true');c.add_argument('--sheet');c.add_argument('--section',help='Exact parent section heading when item numbers repeat');c.add_argument('--range',default='A1:Z200')
  c=sub.add_parser('search');c.add_argument('query');c.add_argument('--provider',choices=['commons','youtube','brave'],default='commons');c.add_argument('--limit',type=int,default=6)
  c=sub.add_parser('fetch');c.add_argument('url');c.add_argument('--kind',choices=['file','page','video','screenshot'],required=True);c.add_argument('--purpose',choices=['fact','context'],default='context');c.add_argument('--height',type=int,default=1080);c.add_argument('--browser',help='Explicit consent to use this browser login, e.g. chrome');c.add_argument('--selector');c.add_argument('--max-mb',type=int,default=500)
@@ -23,6 +25,9 @@ def main():
  elif not root.is_dir():raise ValueError('Project directory is absent; run setup first')
  elif a.command=='connect':toolchain.connect(root,a.configure,a.resume);return
  elif a.command=='status':subprocess.run(toolchain.lark(root)+['auth','status'],check=True,cwd=root);return
+ elif a.command=='fonts':
+  python=root/'.venv'/('Scripts/python.exe' if __import__('os').name=='nt' else 'bin/python')
+  subprocess.run([str(python),str(root/'scripts/font_import.py'),'--title',a.title,'--subtitle',a.subtitle,'--body',a.body],check=True,cwd=root);return
  elif a.command=='intake':result=intake.intake(root,a.url,a.item,a.download,a.sheet,a.range,a.section)
  elif a.command=='search':result=materials.search(root,a.query,a.provider,a.limit)
  elif a.command=='import':result=materials.import_file(root,a.file,purpose=a.purpose)

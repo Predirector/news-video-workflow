@@ -20,14 +20,28 @@
 
 ## 首次配置
 
-- 本地Node.js 20.19（20系列）或22.12以上、Python3.12以上；首次需联网安装锁定的Node依赖、隔离的Python依赖、字体和必要浏览器。现有工具先检查、可用则复用。
+- 本地Node.js 20.19（20系列）或22.12以上、Python3.12以上；首次需联网安装锁定的Node依赖、隔离的Python依赖、官方字体和必要浏览器。字体不默默替换，下载失败/缺字会指出问题。现有工具先检查、可用则复用。
 - 媒体路径由使用者自己的配置决定，没有原作者电脑用户名、盘符或其他工程依赖。
 - 已集成官方飞书CLI的本地安装、应用配置引导、设备登录与状态检查；令牌管理和刷新由官方CLI负责。使用者在自己的账号完成一次授权，企业可能需要管理员批准。
 - 提供按编号读取Docx/Wiki/Sheets、选中条目附件下载，以及网页图片、原版网页截图、yt-dlp视频下载和本地素材导入。搜索优先用Codex网页搜索，另有Commons、视频搜索及可选Brave后端。
-- 真实视频、文章截图、配乐和字体按当期用途自行准备。仓库不含客户原稿、真实视频、音乐库、Cookie、令牌或私钥。
+- 真实视频、文章截图和配乐由Codex按当期采集/导入；默认字体从官方源获取，特殊授权字体由使用者提供。仓库不含客户原稿、真实视频、音乐库、Cookie、令牌或私钥。
 
 
-## v1.1：连接与采集入口
+## v1.2：把细则与实际视觉一起交接
+
+此前v1.1的简化starter没有等价迁移原工程字体与全部细节，能运行不代表能复现原视觉。v1.2补上：
+
+- [13组完整制作细则](skills/news-video-workflow/references/editorial-rules.md)，覆盖本项目连续对话中的标题/字体、封面、原版报道、单高亮、素材对应/重复/闪帧、两类字幕、背景、音乐卡点、文件归拢和条件性交付。
+- [逐项实现与验收矩阵](skills/news-video-workflow/references/implementation-matrix.md)，明确自动检查、实际审看和未实现的条件分支，不能把规则当作工具已具备。
+- 官方实际字体文件/字重与哈希、缺字检查、独立主副标题字体、真实花字厚度与底托；详见[字体与复现](skills/news-video-workflow/references/visual-reproduction.md)。
+- 新工程生成AGENTS和完整规则；正式制作逐镜填写production-plan，渲染输出字体/规则/音乐节点分析及360px实际手机帧。清理前需要逐项、真实文件支持的审核记录。
+- [样式学习工具与样式卡](skills/news-video-workflow/references/reference-library.md)，提取真实参考片，不猜字体/曲名，不把尚未实现的样式称作可用模板。
+
+实际效果可查看[三套手机视觉基准](skills/news-video-workflow/assets/visual-baselines/README.md)，不是只看代码与字体名。
+
+已有工程**不会**因Skill更新自动改变。先运行`upgrade_project.py`查看迁移计划；它保护当期脚本、素材和自定义源码，不能覆盖另一个Codex已经做过的独立布局。
+
+## 连接与采集入口
 
 安装后的技能目录记为`SKILL`，自己的新工程目录记为`PROJECT`：
 
@@ -53,9 +67,9 @@ python3 "$SKILL/scripts/news.py" --project "$PROJECT" collect --input '<上一�
 
 | 样式 | 主要变化 |
 |---|---|
-| paper-red | 明亮纸纹、粗宋标题、红白底托与对照板 |
-| speed-yellow | 亮黄深墨、粗黑标题、速度/指标分组 |
-| berry-progress | 暖白莓红、标题字重差异、阶段递进板 |
+| paper-red | 明亮纸纹、普惠体Black标题、红白底托与对照板 |
+| speed-yellow | 亮黄深墨、Noto Sans SC 900标题、速度/指标分组 |
+| berry-progress | 暖白莓红、普惠体Heavy标题、阶段递进板 |
 
 这些是可运行起点。Codex仍需从稿件核心出发选图、调整字体与结构、看实际编码结果，不能仅靠安装保证审美与选曲合格。
 

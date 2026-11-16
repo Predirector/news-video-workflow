@@ -41,6 +41,8 @@ def ffmpeg():
 def run(args):subprocess.run([str(v) for v in args],check=True,cwd=ROOT,env=tool_env(args[0]))
 def save_json(p,value):Path(p).write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 def validate(d,check_files=True):
+ from visual import resolve_fonts
+ resolve_fonts(d)
  if d.get('mode') not in ['news','speech']:raise ValueError('mode must be news or speech')
  if d.get('style') not in ['paper-red','speed-yellow','berry-progress']:raise ValueError('Unknown style')
  if any(c in d.get('name','') for c in '/\\\0') or not d.get('name'):raise ValueError('Use the full numbered title without path separators')

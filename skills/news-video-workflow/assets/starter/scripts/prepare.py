@@ -12,22 +12,13 @@ if D.get('demo'):
  y+=.025*np.sin(2*np.pi*220*t)*(.5+.5*np.cos(2*np.pi*t/3.75))
  with wave.open(str(dest),'w') as w:w.setnchannels(2);w.setsampwidth(2);w.setframerate(SR);w.writeframes((np.repeat(y[:,None],2,axis=1)*32767).astype('<i2').tobytes())
 N=validate(D);RATE=float(D.get('speechRate',1)) if D['mode']=='speech' else 1
-# Measure the actual chosen font, retain script wording, and never shrink below readable size.
-fontpath=asset(D['fonts']['title']);header_sizes=[]
-for i,text in enumerate(D['mainTitle']):
- size=({'paper-red':[60,76],'speed-yellow':[68,68],'berry-progress':[63,84]}[D['style']])[min(i,1)]
- while True:
-  font=ImageFont.truetype(str(fontpath),size)
-  try:font.set_variation_by_axes([a['maximum'] for a in font.get_variation_axes()])
-  except Exception:pass
-  if font.getlength(text)<=940:break
-  size-=1
-  if size<56:raise ValueError(f'Title line too long: {text}. Reflow the exact wording, do not truncate it.')
- header_sizes.append(size)
-bodyfont=ImageFont.truetype(str(asset(D['fonts']['body'])),39)
-for line in D['subtitle']:
- if bodyfont.getlength(line)>940:raise ValueError('Subtitle line too long; reflow exact text into at most two lines.')
-ff=ffmpeg();compiled=dict(D);compiled['headerFonts']=header_sizes;compiled.update(fps=FPS,frames=N,coverFrames=3,segments=[],subtitles=[]);voices=[];offset=3;raw_offset=0;timemap=[];cleanup=[]
+from visual import audit_fonts,layout
+catalog=json.loads((ROOT/'font-catalog.json').read_text())
+font_audit=audit_fonts(D,asset,catalog)
+visual_layout=layout(D,asset,font_audit)
+header_sizes=visual_layout['mainSizes']
+save_json(reports()/'font-audit.json',font_audit)
+ff=ffmpeg();compiled=dict(D);compiled['headerFonts']=header_sizes;compiled['fontAudit']=font_audit;compiled['visualLayout']=visual_layout;compiled.update(fps=FPS,frames=N,coverFrames=3,segments=[],subtitles=[]);voices=[];offset=3;raw_offset=0;timemap=[];cleanup=[]
 def read_wav(file):
  with wave.open(str(file)) as w:return np.frombuffer(w.readframes(w.getnframes()),dtype='<i2').reshape(-1,2).astype(float)/32768
 for i,s0 in enumerate(D['segments']):
@@ -61,12 +52,18 @@ if D['mode']=='speech':
   compiled['subtitles']=[{'a':mapped(float(s['start'])),'b':min(N,mapped(float(s['end']))),'text':s['text'],'keywords':s.get('keywords',[])} for s in D['subtitles']]
  else:compiled['subtitles']=[{'a':s['startFrame'],'b':s['startFrame']+s['frames'],'text':s.get('caption',''),'keywords':s.get('keywords',[])} for s in compiled['segments'] if s.get('caption')]
  for s in compiled['subtitles']:
+  from visual import wrap,measured_font
+  s['lines']=wrap(s['text'],measured_font(asset(D['fonts']['body']),54,font_audit['body']['selectedWeight']),924)
+  if len(s['lines'])>2:raise ValueError('Speech subtitle needs a shorter complete phrase, not smaller text')
   if not 3<=s['a']<s['b']<=N:raise ValueError('Invalid subtitle interval')
 m=np.zeros_like(v)
 if D.get('bgm'):
  bg=D['bgm'];temp=TMP/'music-part.wav';run([ff,'-v','error','-ss',bg.get('start',0),'-i',asset(bg['asset']),'-vn','-t',N/FPS,'-ar',SR,'-ac','2','-y',temp]);z=read_wav(temp)
  if len(z)<len(m)-2400:raise ValueError('Music excerpt is too short; use one longer continuous excerpt, do not loop/stitch it silently.')
- m[:min(len(z),len(m))]=z[:len(m)];cleanup.append(str(temp.relative_to(PUB)));m*=.075/(np.sqrt(np.mean(m*m))+1e-12)
+ m[:min(len(z),len(m))]=z[:len(m)]
+ from music_analysis import analyze
+ save_json(reports()/'music-analysis.json',analyze(m,SR,compiled['segments']))
+ cleanup.append(str(temp.relative_to(PUB)));m*=.075/(np.sqrt(np.mean(m*m))+1e-12)
  if D['mode']=='speech':
   gain=np.full(N,.85)
   for s in compiled['subtitles']:gain[max(0,s['a']-4):min(N,s['b']+5)]=.38
@@ -78,6 +75,8 @@ if abs(x).max()>.94:x*=.94/abs(x).max()
 def save_wav(dest,x):
  with wave.open(str(dest),'w') as w:w.setnchannels(2);w.setsampwidth(2);w.setframerate(SR);w.writeframes((x*32767).astype('<i2').tobytes())
 save_wav(asset('voice.wav'),v);save_wav(asset('mix.wav'),x)
+from production_audit import audit
+audit(compiled)
 compiled['audioPeak']=float(abs(x).max());compiled['captionMode']='normal phrase' if D['mode']=='speech' else 'fixed-layout progressive';save_json(ROOT/'episode.compiled.json',compiled)
 save_json(reports()/'prepared.json',{'frames':N,'seconds':N/FPS,'speechRate':RATE,'pitchPreserved':True,'musicRate':1,'audioPeak':compiled['audioPeak'],'episodeHash':sha(ROOT/'episode.json'),'media':[{'asset':str(p.relative_to(PUB)),'bytes':p.stat().st_size,'sha256':sha(p)} for p in PUB.rglob('*') if p.is_file() and p.suffix!='.part']})
 save_json(reports()/'process-files.json',cleanup);print(json.dumps({'prepared':True,'frames':N,'seconds':N/FPS,'mode':D['mode'],'rate':RATE},ensure_ascii=False))

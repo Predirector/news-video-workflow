@@ -3,7 +3,8 @@ from common import *
 import av,numpy as np
 from PIL import Image,ImageDraw
 D=json.loads((ROOT/'episode.compiled.json').read_text());F=output()/(D['name']+'.mp4');N=D['frames'];c=av.open(str(F));v=c.streams.video[0];assert (v.width,v.height,v.average_rate)==(1080,1920,30)
-points=sorted(set([0,1,2,3,N-1]+[round(x) for x in np.linspace(3,N-1,8)]));samples={};prev=None;black=[];spikes=[]
+extra=[max(3,min(N-1,s['startFrame']+offset)) for s in D['segments'] for offset in [1,round(s.get('revealFrames',30)/2),round(s.get('revealFrames',30))+4,s['frames']-1]]
+points=sorted(set([0,1,2,3,N-1]+extra+[round(x) for x in np.linspace(3,N-1,8)]));samples={};prev=None;black=[];spikes=[]
 for i,f in enumerate(c.decode(video=0)):
  a=f.reformat(width=108,height=192,format='gray').to_ndarray().astype(float)
  if a.mean()<20:black.append(i)
@@ -23,8 +24,11 @@ if corr is not None:assert corr>.96,corr
 contact=output()/'__checks/final-contact.jpg';contact.parent.mkdir(exist_ok=True);sh=Image.new('RGB',(1080,1980),'#eee');dr=ImageDraw.Draw(sh)
 for j,fr in enumerate([0]+[round(x) for x in np.linspace(3,N-1,8)]):sh.paste(samples[fr].resize((360,640)),(j%3*360,j//3*660));dr.text((j%3*360+8,j//3*660+643),f'{fr/30:.2f}s',fill='black')
 sh.save(contact,quality=93)
+for old in contact.parent.glob('phone-frame-*.png'):old.unlink()
+phone=contact.parent/'cover-phone.png';samples[0].resize((360,640)).save(phone)
+for k in extra:samples[k].resize((360,640)).save(contact.parent/f'phone-frame-{k}.png')
 pairs=[[x[0],y[0]] for x,y in zip(spikes,spikes[1:]) if y[0]-x[0]<6]
-report={'file':str(F),'sha256':sha(F),'frames':N,'seconds':N/30,'resolution':[1080,1920],'decodedAllFrames':True,'blackFrames':black,'firstThreeCoverFrames':True,'coverError':err,'audioPeak':float(abs(a).max()),'audioCorrelation':corr,'shortFlashCandidates':pairs,'contact':str(contact),'manualReviewRequired':True,'speechRate':D.get('speechRate',1),'captionMode':D['captionMode']};save_json(reports()/'verification.json',report)
+report={'file':str(F),'sha256':sha(F),'frames':N,'seconds':N/30,'resolution':[1080,1920],'decodedAllFrames':True,'blackFrames':black,'firstThreeCoverFrames':True,'coverError':err,'audioPeak':float(abs(a).max()),'audioCorrelation':corr,'shortFlashCandidates':pairs,'contact':str(contact),'manualReviewRequired':True,'technicalPassDoesNotApproveVisuals':True,'fontAudit':D.get('fontAudit'),'productionAudit':str(reports()/'production-audit.json'),'phoneCover':str(phone),'speechRate':D.get('speechRate',1),'captionMode':D['captionMode']};save_json(reports()/'verification.json',report)
 def ts(f):
  ms=round(f/30*1000);h,ms=divmod(ms,3600000);m,ms=divmod(ms,60000);s,ms=divmod(ms,1000);return f'{h:02}:{m:02}:{s:02},{ms:03}'
 subs=D['subtitles'] if D['mode']=='speech' else [{'a':s['startFrame'],'b':s['startFrame']+s['frames'],'text':s.get('caption','')} for s in D['segments']]

@@ -1,0 +1,53 @@
+{
+  ".gitignore": [
+    "5e4aaed5fcd69ddd9fe4b638c183b6869218cb48932d7176678a75cfc989c4aa"
+  ],
+  "episode.json": [
+    "46be8de19572f7c77b5027372564d7c3321732ecedfa3db36bf0d08d91fda4e9"
+  ],
+  "package-lock.json": [
+    "52d4fcc2372259143d06e0eb127e4b563dce16ad14c27dbb7b404a7a6fda27a9"
+  ],
+  "package.json": [
+    "b82f2097e724b675022a548334c7c2de1128d06a9a6830a566696237d81bd2c3"
+  ],
+  "public/demo/battery.svg": [
+    "3a1b968c2b7b0144733e3528f64909f4a2fa0f1df06dacc78a8732e1ff38d462"
+  ],
+  "public/demo/industry.svg": [
+    "4e1315f958acaba9394a0c2d7cc65af00847680a27b0bbae637755404bc484cd"
+  ],
+  "requirements.txt": [
+    "204b85334ff19c60df959f41c5b5da25645eb446031ae890c4f604a50eeacce9"
+  ],
+  "scripts/bootstrap.py": [
+    "c24830c4b0b7833688d87099883f0b0356d37b1af9641ae1984013edcba2d17a"
+  ],
+  "scripts/cleanup.py": [
+    "57391473e43ebd06263afa7f680c6558727ea6cf4025da757ebef8504ffa9a06"
+  ],
+  "scripts/common.py": [
+    "1cfd383fba777d9a70a179da3fa20a34b6902143d589989cb1eabc0751ccba71"
+  ],
+  "scripts/doctor.py": [
+    "25f83a52000e7e6357b417bd9da5e1177acc38ba5aa052d2f1b909be14f57ec8"
+  ],
+  "scripts/import_media.py": [
+    "6f43d34a202aecd601a65ea005fe3340b035c1db63c4c5e5194e4d4c35fa51c3"
+  ],
+  "scripts/prepare.py": [
+    "499c1aa8127f76187e2537a7917d28ab46843208c664614b92c9dabfdb6ae4eb"
+  ],
+  "scripts/python.mjs": [
+    "64be1881c3e56eceafb98f0c14b047a5f33b6507d25693c24c8c774432257a25"
+  ],
+  "scripts/render.mjs": [
+    "188ce708c6e57317e4525ff62486c50328de6d937c6eb2273d2bd3132516cdee"
+  ],
+  "scripts/verify.py": [
+    "7664acb5ef0839da20e08e4c22fb1fcf429328db2e51c5e6c5377bb0866dcd44"
+  ],
+  "src/Root.tsx": [
+    "5d6aa5b556ffe2d9e0767309c314b1fb390b24b3cf002471835bed8b58eb4dd1"
+  ]
+}

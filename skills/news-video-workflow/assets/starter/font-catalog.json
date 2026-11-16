@@ -1,0 +1,39 @@
+{
+  "fonts/AlibabaPuHuiTi-2-115-Black.ttf": {
+    "url": "https://fonts.alibabadesign.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-115-Black/AlibabaPuHuiTi-2-115-Black.ttf",
+    "referer": "https://fonts.alibabagroup.com/",
+    "sha256": "abe59aa71d082934100cddf1b880c098954549335bf8c0091d0627aa5d1f2e67",
+    "family": "Alibaba PuHuiTi 2.0",
+    "style": "115-Black",
+    "licensePage": "https://fonts.alibabagroup.com/",
+    "redistributed": false
+  },
+  "fonts/AlibabaPuHuiTi-2-105-Heavy.ttf": {
+    "url": "https://fonts.alibabadesign.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-105-Heavy/AlibabaPuHuiTi-2-105-Heavy.ttf",
+    "referer": "https://fonts.alibabagroup.com/",
+    "sha256": "27f52c9bd7cba4104acffba8bc9a5f6477be67c19353c548312b31e33dcebab9",
+    "family": "Alibaba PuHuiTi 2.0",
+    "style": "105-Heavy",
+    "licensePage": "https://fonts.alibabagroup.com/",
+    "redistributed": false
+  },
+  "fonts/AlibabaPuHuiTi-2-85-Bold.ttf": {
+    "url": "https://fonts.alibabadesign.com/AlibabaPuHuiTi-2/AlibabaPuHuiTi-2-85-Bold/AlibabaPuHuiTi-2-85-Bold.ttf",
+    "referer": "https://fonts.alibabagroup.com/",
+    "sha256": "95db198aa30a998fdb38dd0a4b9b44eb383c19c85c43d6506b25e2b4d138fa08",
+    "family": "Alibaba PuHuiTi 2.0",
+    "style": "85-Bold",
+    "licensePage": "https://fonts.alibabagroup.com/",
+    "redistributed": false
+  },
+  "fonts/NotoSansSC.ttf": {
+    "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/NotoSansSC%5Bwght%5D.ttf",
+    "referer": "https://github.com/google/fonts",
+    "sha256": "a3041811a78c361b1de50f953c805e0244951c21c5bd412f7232ef0d899af0da",
+    "family": "Noto Sans SC",
+    "style": "variable wght",
+    "licensePage": "https://github.com/google/fonts/tree/main/ofl/notosanssc",
+    "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssc/OFL.txt",
+    "redistributed": false
+  }
+}

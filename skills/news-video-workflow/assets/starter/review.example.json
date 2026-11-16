@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "checkedFiles": [],
+  "checks": {
+    "cover": {"status":"pending","notes":"实际封面/前三帧，命题、固定标题、3:4区域"},
+    "fonts": {"status":"pending","notes":"font-audit及实际字面，不能只有字体名"},
+    "mobileTypography": {"status":"pending","notes":"实际360px手机图，标题层级、正文与板形"},
+    "evidenceAndMaterials": {"status":"pending","notes":"原版报道、标记、身份年份、画面与事实对应"},
+    "captionsAndHolds": {"status":"pending","notes":"早中晚帧，不漏字不跳位，完成后阅读停留"},
+    "transitionsAndFlash": {"status":"pending","notes":"实际切镜边界和源视频内部切点"},
+    "musicAndSync": {"status":"pending","notes":"实际试听文件/区间，连续、快讯听感、已用曲检查与节点"}
+  },
+  "unresolved": ["示例只是结构，请真正审看后填写reports/review.json，不照抄成已通过"]
+}

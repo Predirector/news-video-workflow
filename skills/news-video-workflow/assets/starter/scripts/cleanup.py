@@ -4,7 +4,9 @@ import argparse
 from PIL import Image
 p=argparse.ArgumentParser();p.add_argument('--apply',action='store_true');a=p.parse_args();v=json.loads((reports()/'verification.json').read_text());F=Path(v['file']);assert sha(F)==v['sha256'];review=reports()/'review.json'
 if a.apply:
- if not review.exists() or json.loads(review.read_text()).get('passed') is not True:raise SystemExit('Write reports/review.json after inspecting actual cover/contact/boundaries; require {"passed":true,"checked":[...],"notes":"..."}.')
+ if not review.exists():raise SystemExit('Write reports/review.json from actual review; see review.example.json')
+ from review_gate import validate_review
+ validate_review(json.loads(review.read_text()),ROOT,media_root())
 raw=json.loads((reports()/'process-files.json').read_text());candidates=[asset(rel) for rel in raw]+[p for p in (output()/'__checks').glob('frame-*.png')];rows=[]
 for f in candidates:
  if not f.exists():continue

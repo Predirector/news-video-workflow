@@ -13,8 +13,9 @@
   ],
   "speechRate": 1,
   "fonts": {
-    "title": "fonts/NotoSerifSC.ttf",
-    "body": "fonts/NotoSansSC.ttf"
+    "title": "fonts/AlibabaPuHuiTi-2-115-Black.ttf",
+    "subtitle": "fonts/AlibabaPuHuiTi-2-105-Heavy.ttf",
+    "body": "fonts/AlibabaPuHuiTi-2-85-Bold.ttf"
   },
   "cover": {
     "asset": "demo/battery.svg",
@@ -77,5 +78,6 @@
   "expectedTitles": {
     "main": "真实素材，清晰资讯三套样式，按主题变化",
     "subtitle": "功能演示｜请换成正式稿件与素材"
-  }
+  },
+  "fontPreset": "style-default"
 }
