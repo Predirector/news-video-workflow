@@ -4,13 +4,13 @@
 
 ## 安装到自己的Codex
 
-让有仓库访问权限的使用者，在Codex中发送：
+任何使用者都可以在Codex中发送：
 
 > 使用 Skill Installer 安装这个技能：https://github.com/Predirector/news-video-workflow/tree/main/skills/news-video-workflow
 
 安装整个`skills/news-video-workflow`目录，不能只复制SKILL.md。Skill内已包含运行工程和参考规范，不依赖仓库根目录或原作者的其他项目。安装后在下一轮聊天用`$news-video-workflow`调用；若当前Codex未刷新，重新打开聊天或重启应用。
 
-私有仓库需要自己的GitHub账号先有访问权限。这个地址不会替别人授权GitHub、飞书或视频平台。若没有Skill Installer，也可将整个技能目录复制到Codex支持的用户技能目录`~/.agents/skills/news-video-workflow`。
+本仓库公开，无需邀请或仓库访问授权即可下载。这个地址不会替别人授权飞书或视频平台。若没有Skill Installer，也可将整个技能目录复制到Codex支持的用户技能目录`~/.agents/skills/news-video-workflow`。
 
 可复制的首次请求：
 
@@ -46,3 +46,5 @@
 `.codex-plugin/plugin.json`另提供插件格式清单；本版主要验收安装路径为GitHub目录→Skill Installer→独立工程。这里不是公开插件商店上架声明。
 
 安装与运行核验见[VALIDATION.md](VALIDATION.md)。第三方字体保留下载时的OFL声明，运行依赖按其各自许可使用。
+
+本仓库原创代码与规范采用 [MIT License](LICENSE)。第三方依赖、字体和使用者自行提供的媒体继续遵守各自许可。
