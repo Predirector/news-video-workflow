@@ -17,3 +17,5 @@ episode.compiled.json
 source/
 
 **/public/demo/*.wav
+
+.news-tools/

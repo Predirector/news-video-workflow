@@ -53,8 +53,31 @@ def text_in(obj):
    for v in obj.values():yield from text_in(v)
  elif isinstance(obj,list):
   for v in obj:yield from text_in(v)
+class CLIClient(Client):
+ def __init__(self,command,base,workspace=None):self.command=command;self.base=base;self.token='';self.workspace=workspace
+ def get(self,path):
+  from toolchain import cli_get
+  return cli_get(self.command,path,workspace=self.workspace)
+ def download(self,token,dest,limit,route=None):
+  from toolchain import cli_get
+  import uuid
+  if dest.exists():raise FileExistsError('Destination exists')
+  tmp=dest.with_name(dest.name+'.'+uuid.uuid4().hex+'.part')
+  q='?'+urllib.parse.urlencode({'extra':json.dumps({'drive_route_token':route})}) if route else ''
+  try:
+   cli_get(self.command,'/drive/v1/medias/'+urllib.parse.quote(token,safe='')+'/download'+q,tmp)
+   if not tmp.is_file() or tmp.stat().st_size==0:raise RuntimeError('CLI returned no media')
+   if tmp.stat().st_size>limit:raise ValueError('Media exceeds configured maximum size')
+   with tmp.open('rb') as f:
+    if f.read(100).lstrip().startswith(b'{'):raise RuntimeError('Media download returned JSON; inspect permissions')
+   digest=hashlib.sha256(tmp.read_bytes()).hexdigest()
+   if dest.exists():raise FileExistsError('Destination exists')
+   tmp.replace(dest)
+   return {'file':str(dest),'bytes':dest.stat().st_size,'sha256':digest}
+  finally:
+   if tmp.exists():tmp.unlink()
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--url',required=True);p.add_argument('--output',required=True);p.add_argument('--sheet');p.add_argument('--range',default='A1:Z200');p.add_argument('--download-media');p.add_argument('--max-size-mb',type=int,default=500);a=p.parse_args();out=Path(a.output).expanduser()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--url',required=True);p.add_argument('--output',required=True);p.add_argument('--project',help='Use this project official CLI and its managed login');p.add_argument('--sheet');p.add_argument('--range',default='A1:Z200');p.add_argument('--download-media');p.add_argument('--max-size-mb',type=int,default=500);a=p.parse_args();out=Path(a.output).expanduser()
  if out.exists():p.error('Output exists; choose a new output path')
  u=urllib.parse.urlparse(a.url);host=(u.hostname or '').lower();is_lark=host=='larksuite.com' or host.endswith('.larksuite.com')
  if u.scheme!='https' or not(is_lark or host=='feishu.cn' or host.endswith('.feishu.cn')):p.error('Use an HTTPS Feishu/Lark document URL')
@@ -62,12 +85,17 @@ def main():
  if not m:p.error('Supported URL types: wiki, docx, sheets')
  token=os.environ.get('FEISHU_USER_ACCESS_TOKEN','').strip()
  if not token and os.environ.get('FEISHU_TOKEN_FILE'):token=Path(os.environ['FEISHU_TOKEN_FILE']).expanduser().read_text().strip()
- if not token:p.error('Set FEISHU_USER_ACCESS_TOKEN or FEISHU_TOKEN_FILE using your own authorization; do not paste tokens into chat')
- c=Client(token,'https://open.larksuite.com/open-apis' if is_lark else 'https://open.feishu.cn/open-apis');kind,obj=m.groups();result={'url':urllib.parse.urlunparse(u._replace(query='',fragment='')),'downloads':[]};media=[]
+ if not token and not a.project:p.error('Set FEISHU_USER_ACCESS_TOKEN or FEISHU_TOKEN_FILE using your own authorization; do not paste tokens into chat')
+ base='https://open.larksuite.com/open-apis' if is_lark else 'https://open.feishu.cn/open-apis'
+ if a.project:
+  from toolchain import lark
+  c=CLIClient(lark(a.project),base,a.project)
+ else:c=Client(token,base)
+ kind,obj=m.groups();result={'url':urllib.parse.urlunparse(u._replace(query='',fragment='')),'downloads':[]};media=[]
  try:
   if kind=='wiki':
    node=c.get('/wiki/v2/spaces/get_node?'+urllib.parse.urlencode({'token':obj}))['node'];obj=node['obj_token'];kind=node['obj_type'];result['title']=node.get('title','')
-  result['type']=kind
+  result['type']=kind;result['objectToken']=obj
   if kind=='docx':
    blocks=c.docx(obj);result['blocks']=blocks;result['text']='\n'.join(''.join(text_in(b)) for b in blocks);result['embeddedSheetRefs']=[b['sheet'].get('token') for b in blocks if isinstance(b.get('sheet'),dict)]
    for b in blocks:
@@ -77,6 +105,8 @@ def main():
   elif kind in ['sheet','sheets']:
    if not re.fullmatch(r'[A-Z]{1,3}[1-9][0-9]*:[A-Z]{1,3}[1-9][0-9]*',a.range):p.error('Use a bounded range, for example A1:Z200')
    sheets=c.get('/sheets/v3/spreadsheets/'+obj+'/sheets/query').get('sheets',[]);selected=[s for s in sheets if not a.sheet or s['sheet_id']==a.sheet];result['sheets']=[]
+   if a.sheet and not selected:raise ValueError('Specified sheet ID was not found')
+   result['sheetsTruncated']=len(selected)>10
    for s in selected[:10]:
     d=c.get('/sheets/v2/spreadsheets/'+obj+'/values_batch_get?'+urllib.parse.urlencode({'ranges':s['sheet_id']+'!'+a.range,'valueRenderOption':'UnformattedValue'}));result['sheets'].append({'sheet':s,'data':d})
     def attachments(x):
@@ -93,9 +123,9 @@ def main():
    for i,item in enumerate(media):
     name=PurePosixPath(str(item['name']).replace('\\','/')).name or 'attachment.bin'
     try:r=c.download(item['token'],dest/f'{i+1:03}-{name}',a.max_size_mb*1024*1024,item.get('route'));r['ok']=True
-    except Exception as e:r={'ok':False,'name':name,'error':str(e).replace(token,'[redacted]')}
+    except Exception as e:r={'ok':False,'name':name,'error':(str(e).replace(token,'[redacted]') if token else str(e))}
     result['downloads'].append(r)
   out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps({'output':str(out),'type':kind,'mediaCount':len(media),'downloaded':sum(bool(r.get('ok')) for r in result['downloads']),'failed':sum(not r.get('ok') for r in result['downloads'])},ensure_ascii=False))
  except urllib.error.HTTPError as e:raise SystemExit(f'Feishu HTTP {e.code}. Check your token expiry and target document/media read permissions; no credentials were printed.')
- except Exception as e:raise SystemExit(str(e).replace(token,'[redacted]'))
+ except Exception as e:raise SystemExit((str(e).replace(token,'[redacted]') if token else str(e)))
 if __name__=='__main__':main()

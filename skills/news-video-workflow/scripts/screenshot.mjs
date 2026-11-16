@@ -1,0 +1,10 @@
+// Preserve the site's actual rendered layout; no rewritten article text.
+import fs from 'node:fs';import path from 'node:path';import{createRequire}from'node:module';import dns from'node:dns/promises';import net from'node:net';
+const [root,url,out,selector]=process.argv.slice(2);const require=createRequire(path.join(root,'.news-tools/package.json'));const {chromium}=require('playwright-core');const runtimeRequire=createRequire(path.join(root,'package.json'));const {ensureBrowser}=runtimeRequire('@remotion/renderer');
+const config=fs.existsSync(path.join(root,'runtime.local.json'))?JSON.parse(fs.readFileSync(path.join(root,'runtime.local.json'))):{};
+const browser=await ensureBrowser({browserExecutable:process.env.REMOTION_BROWSER_EXECUTABLE??config.browserExecutable,logLevel:'error'});
+const b=await chromium.launch({executablePath:browser.path,headless:true});
+try{const context=await b.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
+const cache=new Map();async function allowed(raw){try{const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password)return false;if(cache.has(u.hostname))return cache.get(u.hostname);const rows=await dns.lookup(u.hostname,{all:true});const valid=rows.length>0&&rows.every(({address})=>net.isIP(address)===4?!/^(0\.|10\.|127\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(address):!/^(:|f[cd]|fe[89ab]|::ffff:)/i.test(address));cache.set(u.hostname,valid);return valid}catch{return false}}
+await context.route('**/*',async route=>await allowed(route.request().url())?route.continue():route.abort());
+const p=await context.newPage();await p.goto(url,{waitUntil:'domcontentloaded',timeout:45000});await p.waitForTimeout(1500);await p.evaluate(()=>document.fonts.ready);if(selector){const loc=p.locator(selector);if(await loc.count()!==1)throw Error('Screenshot selector must match exactly one original element');await loc.screenshot({path:out,timeout:30000})}else await p.screenshot({path:out,fullPage:true,timeout:30000});await context.close();console.log(JSON.stringify({originalLayout:true,viewport:[1440,1000]}))}finally{await b.close()}

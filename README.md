@@ -14,14 +14,36 @@
 
 可复制的首次请求：
 
-> 使用 $news-video-workflow，在我指定的工作目录创建独立工程，检查运行环境。先运行内置功能演示，再根据我提供的文档、条目编号和素材制作正式资讯视频。同批视频在字体、标题格局、色调、背景和资讯板上有实质差异。
+> 使用 $news-video-workflow，在我指定的工作目录创建独立工程，检查运行环境。补齐工具后引导我完成自己的飞书应用配置和登录，读取我指定的条目并下载附件，再搜索和补充缺失素材。先运行内置功能演示，再制作正式资讯视频。同批视频在字体、标题格局、色调、背景和资讯板上有实质差异。
+
+已安装旧版的使用者，可让Codex从同一地址更新技能；更新前核对已有技能目录和个人改动，不覆盖本期工程、素材或账号配置。
 
 ## 首次配置
 
 - 本地Node.js 20.19（20系列）或22.12以上、Python3.12以上；首次需联网安装锁定的Node依赖、隔离的Python依赖、字体和必要浏览器。现有工具先检查、可用则复用。
 - 媒体路径由使用者自己的配置决定，没有原作者电脑用户名、盘符或其他工程依赖。
-- 飞书优先复用自己的CLI/连接器，也提供基于自己用户令牌的只读Docx/Wiki/Sheets/附件接口。账户开通和OAuth授权由使用者完成。
+- 已集成官方飞书CLI的本地安装、应用配置引导、设备登录与状态检查；令牌管理和刷新由官方CLI负责。使用者在自己的账号完成一次授权，企业可能需要管理员批准。
+- 提供按编号读取Docx/Wiki/Sheets、选中条目附件下载，以及网页图片、原版网页截图、yt-dlp视频下载和本地素材导入。搜索优先用Codex网页搜索，另有Commons、视频搜索及可选Brave后端。
 - 真实视频、文章截图、配乐和字体按当期用途自行准备。仓库不含客户原稿、真实视频、音乐库、Cookie、令牌或私钥。
+
+
+## v1.1：连接与采集入口
+
+安装后的技能目录记为`SKILL`，自己的新工程目录记为`PROJECT`：
+
+```sh
+python3 "$SKILL/scripts/news.py" --project "$PROJECT" setup --runtime
+# 仅首次没有自己的飞书应用配置时：
+python3 "$SKILL/scripts/news.py" --project "$PROJECT" connect --configure
+# 按输出链接完成自己的授权，随后用返回的device code恢复：
+python3 "$SKILL/scripts/news.py" --project "$PROJECT" connect --resume '<device-code>'
+python3 "$SKILL/scripts/news.py" --project "$PROJECT" intake --url '<飞书链接>' --item '2.1' --download
+python3 "$SKILL/scripts/news.py" --project "$PROJECT" collect --input '<上一步生成的result.json>'
+```
+
+已有飞书配置时直接`connect`，已有有效登录可直接`intake`。Codex负责发送授权链接、读取选题结果、核对素材并继续制作。系统Node/Python仍需先安装；平台登录、付费内容、验证码和DRM不由Skill绕过。视频按实际下载尺寸记账，不保证每个源都有1080P。
+
+详细说明：[飞书连接](skills/news-video-workflow/references/feishu.md)、[素材采集](skills/news-video-workflow/references/acquisition.md)。
 
 ## 包含的制作标准
 
@@ -41,7 +63,7 @@
 
 交付MP4、静态封面、SRT、来源JSON和可编辑Remotion工程。附带的SVG和合成节奏只为安装/功能演示，明确不是新闻证据或抖音音乐。
 
-当前包不包含剪映自动转换、自动创建飞书应用、代替使用者登录、私有服务器或生成式图像/音乐服务。可按实际需要另外接入。默认不把本机某一期1.1倍速、固定音乐或外接盘名称推广给所有新视频。
+当前包不包含剪映自动转换、代替使用者完成登录/管理员审批、私有服务器或生成式图像/音乐服务。可通过官方CLI引导创建使用者自己的应用，但不是安装Skill就自动得到文档权限。可按实际需要另外接入。默认不把本机某一期1.1倍速、固定音乐或外接盘名称推广给所有新视频。
 
 `.codex-plugin/plugin.json`另提供插件格式清单；本版主要验收安装路径为GitHub目录→Skill Installer→独立工程。这里不是公开插件商店上架声明。
 

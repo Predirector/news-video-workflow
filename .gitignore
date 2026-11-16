@@ -26,3 +26,5 @@ public/processed/
 **/source/
 
 **/public/demo/*.wav
+
+.news-tools/

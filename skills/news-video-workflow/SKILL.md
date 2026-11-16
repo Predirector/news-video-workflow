@@ -11,12 +11,13 @@ description: 制作或修改中文竖屏资讯视频，包括纯字幕资讯与�
 
 本技能自带可运行的三套版式和制作工具，全部位于当前技能目录，不依赖仓库外的其他工程。
 
-1. 用 `python3 "<本技能目录>/scripts/init_project.py" "<新工程目录>"` 创建独立工程，不覆盖已有工程。
-2. 进入新工程运行 `python3 scripts/bootstrap.py`。先检查已有Node、Python、FFmpeg、浏览器与依赖，缺什么再安装。Node需要20.19（20系列）或22.12以上，Python需要3.12以上；媒体根目录由使用者自行配置。
+1. 简化入口：先按[首次连接与选题读取](references/feishu.md)运行 `scripts/news.py --project "<新工程目录>" setup --runtime`，准备官方飞书CLI、采集工具和视频环境。已有工程只补缺项。也可单独用 `python3 "<本技能目录>/scripts/init_project.py" "<新工程目录>"` 创建独立工程，不覆盖已有工程。
+2. 若第一步未使用`--runtime`，进入新工程运行 `python3 scripts/bootstrap.py`。先检查已有Node、Python、FFmpeg、浏览器与依赖，缺什么再安装。Node需要20.19（20系列）或22.12以上，Python需要3.12以上；媒体根目录由使用者自行配置。
 3. 阅读 [制作标准](references/editorial-rules.md)；准备稿件与素材时查 [输入与采集](references/intake.md)。设置 `episode.json` 时查 [配置与制作命令](references/project-format.md)。
-4. 飞书读取优先用使用者已配置的CLI或连接器；需要独立只读接口时用 `scripts/feishu_read.py`，按 [飞书接入](references/feishu.md) 使用自己的授权。缺权限时指出具体文档或附件，不复制其他人的令牌或服务器配置。
+4. 飞书使用官方CLI：首次引导 `connect --configure`，用户完成自己的应用/登录授权后 `connect --resume`，再 `status` 验证。已有登录直接复用，由官方CLI管理凭据和刷新；不手抄令牌。按[飞书接入](references/feishu.md)用 `intake --url ... --item ... --download` 读取准确条目、原文和附件；有歧义就缩小范围，不能静默选第一条。
+5. 根据选中原文列素材缺口，按[素材采集命令](references/acquisition.md)使用 `search`、`collect`、`fetch` 或 `import` 搜集真实素材、下载视频和截图原报道。默认不读取浏览器Cookie；需登录时让使用者完成，再显式指定自己的浏览器。下载状态、实际清晰度、来源和选材真实性分别核对。
 
-上述 `scripts/init_project.py` 与 `scripts/feishu_read.py` 相对于本技能；工程内命令相对于新工程目录。
+上述 `scripts/news.py`、`scripts/init_project.py` 与 `scripts/feishu_read.py` 相对于本技能；工程内命令相对于新工程目录。
 
 ## 从稿件到成片
 
