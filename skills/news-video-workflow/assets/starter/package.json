@@ -1,0 +1,23 @@
+{
+  "name": "news-video-project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/Root.tsx --no-open",
+    "cover": "node scripts/render.mjs --cover",
+    "render": "node scripts/render.mjs",
+    "verify": "node scripts/python.mjs verify.py",
+    "prepare-media": "node scripts/python.mjs prepare.py"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "dependencies": {
+    "remotion": "4.0.540",
+    "@remotion/cli": "4.0.540",
+    "@remotion/renderer": "4.0.540",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  }
+}

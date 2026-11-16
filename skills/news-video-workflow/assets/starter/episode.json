@@ -1,0 +1,81 @@
+{
+  "name": "01｜资讯视频工作流演示",
+  "demo": true,
+  "mode": "news",
+  "style": "paper-red",
+  "message": "演示真实素材、清晰字幕和可编辑工程的分工；画面为演示图形，不是新闻证据。",
+  "mainTitle": [
+    "真实素材，清晰资讯",
+    "三套样式，按主题变化"
+  ],
+  "subtitle": [
+    "功能演示｜请换成正式稿件与素材"
+  ],
+  "speechRate": 1,
+  "fonts": {
+    "title": "fonts/NotoSerifSC.ttf",
+    "body": "fonts/NotoSansSC.ttf"
+  },
+  "cover": {
+    "asset": "demo/battery.svg",
+    "keywords": [
+      "标题突出",
+      "信息清楚"
+    ]
+  },
+  "bgm": {
+    "asset": "demo/rhythm.wav",
+    "start": 0,
+    "sourceUrl": "generated-local-demo",
+    "channelUrl": null,
+    "credit": "本地合成节奏，仅用于功能演示，不是抖音曲目。"
+  },
+  "sources": [
+    {
+      "asset": "demo/battery.svg",
+      "purpose": "demo",
+      "sourceUrl": "generated-local-demo"
+    },
+    {
+      "asset": "demo/industry.svg",
+      "purpose": "demo",
+      "sourceUrl": "generated-local-demo"
+    }
+  ],
+  "segments": [
+    {
+      "asset": "demo/battery.svg",
+      "kind": "image",
+      "duration": 3.6,
+      "caption": "标题先定题\n画面呈现核心信息",
+      "keywords": [
+        "核心信息"
+      ],
+      "info": {
+        "type": "text",
+        "lines": [
+          "示例图形，不是新闻证据"
+        ]
+      }
+    },
+    {
+      "asset": "demo/industry.svg",
+      "kind": "image",
+      "duration": 3.6,
+      "caption": "不同稿件选择不同样式\n正文保持手机易读",
+      "keywords": [
+        "手机易读"
+      ],
+      "info": {
+        "type": "text",
+        "lines": [
+          "编辑 episode.json 后重新准备和渲染"
+        ]
+      }
+    }
+  ],
+  "expectedTitles": {
+    "main": "真实素材，清晰资讯三套样式，按主题变化",
+    "subtitle": "功能演示｜请换成正式稿件与素材"
+  }
+}
