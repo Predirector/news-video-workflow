@@ -2,21 +2,37 @@
 """Install only missing project dependencies; keep tools and media portable."""
 from pathlib import Path
 import sys,subprocess,shutil,urllib.request,json,argparse,os
+from shared_runtime import pool,locked,link,record,is_reference
 ROOT=Path(__file__).resolve().parents[1]
 if sys.version_info<(3,12):raise SystemExit('Python >=3.12 is required for the locked media dependencies.')
-p=argparse.ArgumentParser();p.add_argument('--skip-fonts',action='store_true');p.add_argument('--skip-browser',action='store_true');p.add_argument('--skip-python',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--local',action='store_true',help='Keep an isolated project environment');p.add_argument('--skip-fonts',action='store_true');p.add_argument('--skip-browser',action='store_true');p.add_argument('--skip-python',action='store_true');a=p.parse_args()
 if not shutil.which('node') or not shutil.which('npm'):raise SystemExit('Install Node.js 20.19 (20 series) or >=22.12 and retry. No global packages will be installed by this script.')
 node_version=json.loads(subprocess.check_output(['node','-p','JSON.stringify(process.versions.node.split(".").map(Number))'],text=True));major,minor=node_version[:2];assert (major==20 and minor>=19) or major>22 or (major==22 and minor>=12),'Node.js 20.19.x (20 series) or >=22.12 is required'
-expected=json.loads((ROOT/'package.json').read_text())['dependencies'];node_ok=all((ROOT/'node_modules'/n/'package.json').is_file() and json.loads((ROOT/'node_modules'/n/'package.json').read_text()).get('version')==v for n,v in expected.items())
-if not node_ok:
- if (ROOT/'node_modules').is_symlink():raise SystemExit('Project node_modules points elsewhere; use an independent project before installing pinned dependencies.')
- subprocess.run(['npm','ci' if (ROOT/'package-lock.json').exists() else 'install','--ignore-scripts'],cwd=ROOT,check=True)
-venv=ROOT/'.venv';python=venv/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
+expected=json.loads((ROOT/'package.json').read_text())['dependencies']
+def node_ready(base):
+ return all((base/'node_modules'/n/'package.json').is_file() and json.loads((base/'node_modules'/n/'package.json').read_text()).get('version')==v for n,v in expected.items())
+node_base=ROOT if a.local or ((ROOT/'node_modules').exists() and not is_reference(ROOT/'node_modules')) else pool('node',{n:(ROOT/n).read_text() for n in ['package.json','package-lock.json']})
+with locked(node_base) if node_base!=ROOT else __import__('contextlib').nullcontext():
+ if not node_ready(node_base):
+  if is_reference(node_base/'node_modules'):raise SystemExit('Existing linked environment is incompatible; preserved. Use a fresh project or explicit migration.')
+  if node_base!=ROOT:
+   for name in ['package.json','package-lock.json']:shutil.copyfile(ROOT/name,node_base/name)
+  subprocess.run(['npm','ci','--ignore-scripts'],cwd=node_base,check=True)
+ if not node_ready(node_base):raise SystemExit('Node dependency verification failed')
+ if node_base!=ROOT:link(node_base/'node_modules',ROOT/'node_modules');record(ROOT,'node',node_base/'node_modules')
+venv=ROOT/'.venv'
+if not a.local and not (venv.exists() and not is_reference(venv)):venv=pool('python',{'requirements':(ROOT/'requirements.txt').read_text()})/'venv'
+python=venv/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
 if not a.skip_python:
- if not python.exists():subprocess.run([sys.executable,'-m','venv',str(venv)],check=True)
- requirements=dict(line.strip().split('==',1) for line in (ROOT/'requirements.txt').read_text().splitlines() if '==' in line)
- check=subprocess.run([str(python),'-c',f'import importlib.metadata as m; expected={requirements!r}; assert all(m.version(n)==v for n,v in expected.items())'],capture_output=True)
- if check.returncode:subprocess.run([str(python),'-m','pip','install','-r',str(ROOT/'requirements.txt')],check=True)
+ with locked(venv.parent) if venv!=ROOT/'.venv' else __import__('contextlib').nullcontext():
+  if not python.exists():subprocess.run([sys.executable,'-m','venv',str(venv)],check=True)
+  requirements=dict(line.strip().split('==',1) for line in (ROOT/'requirements.txt').read_text().splitlines() if '==' in line)
+  check=subprocess.run([str(python),'-c',f'import importlib.metadata as m; expected={requirements!r}; assert all(m.version(n)==v for n,v in expected.items())'],capture_output=True)
+  if check.returncode:
+   uv=shutil.which('uv')
+   cmd=[uv,'pip','install','--python',str(python)] if uv else [str(python),'-m','pip','install']
+   subprocess.run(cmd+['-r',str(ROOT/'requirements.txt')],check=True)
+  if venv!=ROOT/'.venv':link(venv,ROOT/'.venv');record(ROOT,'python',venv)
 from common import public,config,ffmpeg
 pub=public();pub.mkdir(parents=True,exist_ok=True)
 for src in (ROOT/'public').rglob('*'):
@@ -57,5 +73,5 @@ if not a.skip_fonts:
 if not a.skip_browser:
  cmd=['node',str(ROOT/'node_modules/@remotion/cli/remotion-cli.js'),'browser','ensure'];exe=os.environ.get('REMOTION_BROWSER_EXECUTABLE') or config().get('browserExecutable')
  if exe:cmd+=['--browser-executable',exe]
- subprocess.run(cmd,cwd=ROOT,check=True)
+ subprocess.run(cmd,cwd=node_base,check=True)
 print(json.dumps({'project':str(ROOT),'public':str(pub),'ffmpeg':ffmpeg(),'python':str(python) if python.exists() else sys.executable,'next':'Use the project Python (.venv/bin/python on macOS/Linux) for prepare.py, verify.py and cleanup.py.'},ensure_ascii=False,indent=2))

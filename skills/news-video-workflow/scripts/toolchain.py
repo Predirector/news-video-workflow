@@ -1,10 +1,11 @@
 """Project-local acquisition tools; credentials stay in the official CLI keychain."""
 from pathlib import Path
 import json,os,shutil,subprocess,sys,venv
+from shared_runtime import pool,locked,link,record,is_reference
 LARK_VERSION='1.0.100'
 YTDLP_VERSION='2026.10.26'
 def run(args,**kw):
- return subprocess.run([str(x) for x in args],check=True,**kw)
+ return subprocess.run([str(x) for x in args],check=True,timeout=180,**kw)
 def lark(project):
  override=os.environ.get('NEWS_LARK_CLI')
  if override:return [override]
@@ -20,11 +21,21 @@ def yt(project):
  raise RuntimeError('yt-dlp missing. Run setup first.')
 def setup(project):
  if sys.version_info<(3,12):raise RuntimeError('Python >=3.12 is required. Install it and rerun setup.')
- root=Path(project).resolve();tools=root/'.news-tools';tools.mkdir(exist_ok=True)
+ root=Path(project).resolve();local=root/'.news-tools'
+ tools=local if local.exists() and not is_reference(local) else pool('tools',{'lark':LARK_VERSION,'yt-dlp':YTDLP_VERSION,'playwright':'1.65.1'})
+ with locked(tools):
+  result=_setup_tools(root,tools)
+  if tools!=local:link(tools,local);record(root,'tools',tools)
+ return result
+def _setup_tools(root,tools):
  if not shutil.which('node') or not shutil.which('npm'):raise RuntimeError('Install Node.js with npm first, then rerun setup.')
  try:cmd=lark(root)
  except RuntimeError:
-  run(['npm','install','--prefix',tools,'--ignore-scripts','--no-audit','--no-fund','--save-exact','@larksuite/cli@'+LARK_VERSION]);cmd=lark(root)
+  entry=tools/'node_modules/@larksuite/cli/scripts/run.js'
+  if entry.exists():cmd=['node',str(entry)]
+  else:cmd=None
+ if cmd is None:
+  run(['npm','install','--prefix',tools,'--ignore-scripts','--no-audit','--no-fund','--save-exact','@larksuite/cli@'+LARK_VERSION]);cmd=['node',str(tools/'node_modules/@larksuite/cli/scripts/run.js')]
  playwright=tools/'node_modules/playwright-core/package.json'
  if not playwright.exists() or json.loads(playwright.read_text()).get('version')!='1.65.1':
   run(['npm','install','--prefix',tools,'--ignore-scripts','--no-audit','--no-fund','--save-exact','playwright-core@1.65.1'])
@@ -35,8 +46,10 @@ def setup(project):
  p=tools/'venv';exe=p/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
  if not exe.exists():venv.EnvBuilder(with_pip=True).create(p)
  check=subprocess.run([str(exe),'-c',f'import importlib.metadata as m;assert m.version("yt-dlp")=="{YTDLP_VERSION}"'],capture_output=True)
- if check.returncode:run([exe,'-m','pip','install','yt-dlp=='+YTDLP_VERSION])
- return {'lark':cmd,'ytDlp':yt(root),'next':'connect --configure for first app setup; then connect to authorize read-only scopes'}
+ if check.returncode:
+  uv=shutil.which('uv');cmd=[uv,'pip','install','--python',str(exe)] if uv else [exe,'-m','pip','install']
+  run(cmd+['yt-dlp=='+YTDLP_VERSION])
+ return {'lark':cmd,'ytDlp':[str(exe),'-m','yt_dlp'],'next':'connect --configure for first app setup; then connect to authorize read-only scopes'}
 READ_SCOPES='docx:document:readonly docs:document.media:download drive:file:download sheets:spreadsheet:readonly wiki:wiki:readonly drive:drive:readonly offline_access'
 def connect(project,configure=False,resume=None):
  cmd=lark(project)

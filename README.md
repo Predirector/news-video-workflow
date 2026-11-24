@@ -84,3 +84,7 @@ python3 "$SKILL/scripts/news.py" --project "$PROJECT" collect --input '<上一�
 安装与运行核验见[VALIDATION.md](VALIDATION.md)。第三方字体保留下载时的OFL声明，运行依赖按其各自许可使用。
 
 本仓库原创代码与规范采用 [MIT License](LICENSE)。第三方依赖、字体和使用者自行提供的媒体继续遵守各自许可。
+
+## v1.3：同一台电脑复用依赖
+
+新工程默认共享相同锁定版本的 Node、Python 与采集工具环境，不再每期各装一份。项目仍保留自己的源码、清单和锁文件，依赖不同自动分组。原来的制作命令保持不变；已有独立环境保留，不自动清理。配置、隔离选项与旧工程迁移注意事项见[依赖复用](skills/news-video-workflow/references/shared-runtime.md)。

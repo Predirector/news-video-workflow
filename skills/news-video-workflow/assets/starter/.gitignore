@@ -19,3 +19,6 @@ source/
 **/public/demo/*.wav
 
 .news-tools/
+
+runtime-links.local.json
+.news-tools/

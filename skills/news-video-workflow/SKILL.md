@@ -14,7 +14,7 @@ description: 制作或修改中文竖屏资讯视频，包括纯字幕资讯与�
 制作/修改前必须读[详细制作标准R01–R13](references/editorial-rules.md)及[对话要求落实表](references/implementation-matrix.md)，不能只凭本入口摘要开工。新工程同时带入AGENTS.md、完整PRODUCTION_RULES.md与IMPLEMENTATION_MATRIX.md。正式制作由Codex依据原稿填写production-plan.json，逐镜写明事实、选材、封面、字体、背景和音乐决定，不让用户代填技术表。
 
 1. 简化入口：先按[首次连接与选题读取](references/feishu.md)运行 `scripts/news.py --project "<新工程目录>" setup --runtime`，准备官方飞书CLI、采集工具和视频环境。已有工程只补缺项。也可单独用 `python3 "<本技能目录>/scripts/init_project.py" "<新工程目录>"` 创建独立工程，不覆盖已有工程。
-2. 若第一步未使用`--runtime`，进入新工程运行 `python3 scripts/bootstrap.py`。先检查已有Node、Python、FFmpeg、浏览器与依赖，缺什么再安装。Node需要20.19（20系列）或22.12以上，Python需要3.12以上；媒体根目录由使用者自行配置。
+2. 若第一步未使用`--runtime`，进入新工程运行 `python3 scripts/bootstrap.py`。先检查已有Node、Python、FFmpeg、浏览器与依赖，缺什么再安装。新工程默认按锁文件及平台共享本机运行环境；同版本不逐期重装。详见[依赖复用](references/shared-runtime.md)。Node需要20.19（20系列）或22.12以上，Python需要3.12以上；媒体根目录由使用者自行配置。
 3. 首次渲染前检查[字体与视觉基准](references/visual-reproduction.md)，确认实际文件/字重并对照手机图；演示字体不能被当作原工程字体。阅读 [制作标准](references/editorial-rules.md)；准备稿件与素材时查 [输入与采集](references/intake.md)。设置 `episode.json` 时查 [配置与制作命令](references/project-format.md)。
 4. 飞书使用官方CLI：首次引导 `connect --configure`，用户完成自己的应用/登录授权后 `connect --resume`，再 `status` 验证。已有登录直接复用，由官方CLI管理凭据和刷新；不手抄令牌。按[飞书接入](references/feishu.md)用 `intake --url ... --item ... --download` 读取准确条目、原文和附件；有歧义就缩小范围，不能静默选第一条。
 5. 根据选中原文列素材缺口，按[素材采集命令](references/acquisition.md)使用 `search`、`collect`、`fetch` 或 `import` 搜集真实素材、下载视频和截图原报道。默认不读取浏览器Cookie；需登录时让使用者完成，再显式指定自己的浏览器。下载状态、实际清晰度、来源和选材真实性分别核对。
